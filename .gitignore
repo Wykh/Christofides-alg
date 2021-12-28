@@ -1,0 +1,10 @@
+#Do not save file without extension, but folders will saved
+*
+!/**/
+!*.*
+
+#Other ignore
+*DS_Store
+Videos
+.vscode
+*dSYM
