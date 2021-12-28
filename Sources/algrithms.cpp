@@ -3,10 +3,10 @@
 
 cycle ApproxDoubleTree(Graph G)
 {
-    Graph T = Prim(G);
-    DoDoubleEdges(T);    // make 2T graph from T graph by doubling edges
-    cycle C = Fleury(T); // make eulear cycle
-    DoHamiltonCycle(C);  // make Hamilton cycle from eulear cycle
+    Graph T = Prim(G); // N^4/2 - 3N^3/2 + 16
+    DoDoubleEdges(T);    // make 2T graph from T graph by doubling edges // N(N-1)/2
+    cycle C = Fleury(T); // make eulear cycle // Dohuya N^6 * (N^4)!
+    DoHamiltonCycle(C);  // make Hamilton cycle from eulear cycle // N^2
 
     return C;
 }
@@ -97,23 +97,23 @@ bool isEdgeBridge(iEdges es, iEdge edge, int fromVert)
         toVert = sndEdgeVert;
     }
 
-    deleteEdgeByValue(es, edge);
+    deleteEdgeByValue(es, edge); // N(N-1)/ 2 - 1 + N(N-1)/ 2 - 2 ... 0
 
-    return !existsWayBetweenVertexes(es, fromVert, toVert);
+    return !existsWayBetweenVertexes(es, fromVert, toVert); //  (N(N-1)/ 2 - 1)!
 }
 
 // pizda, fucked way, huinya
 iEdge getNonBridgeEdgeFromVert(iEdges &edges, int vert)
 {
     iEdge oneEdge;
-    for (iEdge &edge : edges)
+    for (iEdge &edge : edges) // N(N-1)/ 2 - 1 + N(N-1)/ 2 - 2 ... 0
     {
         int fstIndex = edge.second.first;  // first index of vertex of edge
         int sndIndex = edge.second.second; // second index of vertex of edge
 
-        if ((fstIndex == vert || sndIndex == vert))
+        if ((fstIndex == vert || sndIndex == vert)) 
         {
-            bool edgeIsBridge = isEdgeBridge(edges, edge, vert);
+            bool edgeIsBridge = isEdgeBridge(edges, edge, vert); // (N(N-1)/2 - 1) + (N(N-1)/ 2 - 2 ... 0) * (N(N-1)/2 - 1) + (N(N-1)/ 2 - 2 ... 0)!
             oneEdge = edge;
             if (!edgeIsBridge)
                 return edge;
@@ -174,13 +174,13 @@ cycle Fleury(Graph &G)
     iEdges edgesG = G.es;
     cycle way;
 
-    DoStepOnGraphByEdge(edgesG, way, 0); // delete edge and write edges's vertexes to the `way`
-    while (edgesG.size() != 0)
+    DoStepOnGraphByEdge(edgesG, way, 0); // delete edge and write edges's vertexes to the `way` // 7
+    while (edgesG.size() != 0) // N(N-1)/2 - 1
     {
         int prevVert = way[way.size() - 1];
-        iEdge nextEdge = getNonBridgeEdgeFromVert(edgesG, prevVert);
-        int nextEdgeInd = getIndexOfEdge(edgesG, nextEdge);
-        DoStepOnGraphByEdgeButFromCurrentVertex(edgesG, way, nextEdgeInd, prevVert);
+        iEdge nextEdge = getNonBridgeEdgeFromVert(edgesG, prevVert);  // FACTORIAL
+        int nextEdgeInd = getIndexOfEdge(edgesG, nextEdge); // N(N-1)/ 2 - 1 + N(N-1)/ 2 - 2 ... 0
+        DoStepOnGraphByEdgeButFromCurrentVertex(edgesG, way, nextEdgeInd, prevVert); // N(N-1)/ 2 - 1 + N(N-1)/ 2 - 2 ... 0
     }
 
     return way;
@@ -223,7 +223,7 @@ void markEdgeVertexesAsUsed(std::vector<bool> &usedVerts, iEdge edge)
 
 bool isAllVertexesUsed(std::vector<bool> usedVerts)
 {
-    for (bool vert : usedVerts)
+     for (bool vert : usedVerts)
     {
         if (vert == false)
             return false;
@@ -249,34 +249,35 @@ Graph Prim(Graph G)
     std::vector<bool> usedVerts(mSize, false);
 
     iEdge minEdge = getGraphMinEdge(G.es);
-    addEdgeToGraph(T, minEdge);
-    markEdgeVertexesAsUsed(usedVerts, minEdge);
+    // 3
+    addEdgeToGraph(T, minEdge); // 5
+    markEdgeVertexesAsUsed(usedVerts, minEdge); // 4
 
-    while (!isAllVertexesUsed(usedVerts))
+    while (!isAllVertexesUsed(usedVerts)) // N - 2
     {
         iEdges possibleEdges; // edges insendent to used vertexes
-        for (int i = 0; i < usedVerts.size(); i++)
+        for (int i = 0; i < usedVerts.size(); i++) // N
         {
             // find used vertex
-            if (usedVerts[i] == true)
+            if (usedVerts[i] == true) // 1
             {
                 // see all edges
-                for (iEdge &edge : G.es)
+                for (iEdge &edge : G.es) // n * (n - 2) * 2 * 
                 {
                     int fstIndex = edge.second.first;  // first index of vertex of edge
                     int sndIndex = edge.second.second; // second index of vertex of edge
-
+                    // 2
                     // one of vertexes of edge in T graph and both vertexes are not used
-                    if ((fstIndex == i || sndIndex == i) && !(usedVerts[fstIndex] && usedVerts[sndIndex]))
+                    if ((fstIndex == i || sndIndex == i) && !(usedVerts[fstIndex] && usedVerts[sndIndex])) // 3 - 6
                     {
-                        possibleEdges.push_back(edge);
+                        possibleEdges.push_back(edge); // xz
                     }
                 }
             }
         }
-        iEdge minEdge = getGraphMinEdge(possibleEdges);
-        addEdgeToGraph(T, minEdge);
-        markEdgeVertexesAsUsed(usedVerts, minEdge);
+        iEdge minEdge = getGraphMinEdge(possibleEdges); // N * (N - 1)
+        addEdgeToGraph(T, minEdge); // 3
+        markEdgeVertexesAsUsed(usedVerts, minEdge); // 5
     }
 
     return T;
